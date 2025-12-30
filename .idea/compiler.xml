@@ -13,10 +13,14 @@
         <module name="dgnravepay" />
       </profile>
     </annotationProcessing>
+    <bytecodeTargetLevel>
+      <module name="erm" target="21" />
+    </bytecodeTargetLevel>
   </component>
   <component name="JavacSettings">
     <option name="ADDITIONAL_OPTIONS_OVERRIDE">
       <module name="dgnravepay" options="-parameters" />
+      <module name="erm" options="-parameters" />
     </option>
   </component>
 </project>
