@@ -15,7 +15,7 @@ public class DojahOtpClient {
         this.restClient = RestClient.builder()
                 .baseUrl("https://sandbox.dojah.io/api/v1/messaging")
                 .defaultHeader("AppId", "66b8b14bbe8f00003fdff5da")
-                .defaultHeader("Authorization", "test_pk_zHp7Fgc57v9G1CSL7gI5ec14Z")
+                .defaultHeader("Authorization", "test_sk_1Ik0EXfSufZ24akeQKaAymyhp")
                 .build();
     }
 
