@@ -1,6 +1,7 @@
 package business.banking.dgnravepay.auth.controller;
 
 
+import business.banking.dgnravepay.auth.dto.CreatePasswordApiResponse;
 import business.banking.dgnravepay.auth.dto.CreatePasswordRequestDto;
 import business.banking.dgnravepay.auth.service.PasswordService;
 import lombok.RequiredArgsConstructor;
@@ -17,7 +18,15 @@ public class PasswordController {
     private final PasswordService passwordService;
 
     @PostMapping("/create-password")
-    public void createPassword(@RequestBody CreatePasswordRequestDto dto) {
+    public CreatePasswordApiResponse createPassword(@RequestBody CreatePasswordRequestDto dto) {
+
         passwordService.createPassword(dto);
+
+        return new CreatePasswordApiResponse(
+                true,
+                "Password Created successfully",
+                "login"
+        );
     }
+
 }

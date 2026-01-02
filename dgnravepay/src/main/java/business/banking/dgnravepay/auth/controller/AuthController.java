@@ -51,10 +51,7 @@ public class AuthController {
 
 
     @PostMapping("/resend-otp")
-    public void resendOtp(@RequestBody ResendOtpRequestDto dto) {
-        otpResendService.resendOtp(
-                dto.getPhoneNumber(),
-                dto.getDeviceFingerprint()
-        );
+    public SendOtpResponseDto resendOtp(@RequestBody ResendOtpRequestDto dto) {
+        return otpResendService.resendOtp(dto);
     }
 }

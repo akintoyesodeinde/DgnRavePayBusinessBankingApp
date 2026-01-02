@@ -2,6 +2,7 @@ package business.banking.dgnravepay.auth.service;
 
 
 import business.banking.dgnravepay.auth.client.DojahOtpClient;
+import business.banking.dgnravepay.auth.dto.ResendOtpRequestDto;
 import business.banking.dgnravepay.auth.dto.SendOtpResponseDto;
 import business.banking.dgnravepay.auth.entity.OtpRequestEntity;
 import business.banking.dgnravepay.auth.repository.OtpRequestRepository;
@@ -23,23 +24,23 @@ public class OtpResendService {
     private final OtpCacheService otpCacheService;
     private final OtpRateLimiter rateLimiter;
 
-    public SendOtpResponseDto resendOtp(String phoneNumber, String deviceFingerprint) {
+    public SendOtpResponseDto resendOtp(ResendOtpRequestDto dto) {
 
         OtpRequestEntity lastOtp = otpRepo
-                .findTopByPhoneNumberOrderByCreatedAtDesc(phoneNumber)
+                .findTopByPhoneNumberOrderByCreatedAtDesc(dto.getPhoneNumber())
                 .orElseThrow(() -> new IllegalStateException("No OTP request found"));
 
 
 
 
         // Send new OTP
-        SendOtpResponseDto dojah = dojahClient.sendOtp(phoneNumber);
+        SendOtpResponseDto dojah = dojahClient.sendOtp(dto.getPhoneNumber());
 
         OtpRequestEntity otp = new OtpRequestEntity();
         otp.setId(UUID.randomUUID());
-        otp.setPhoneNumber(phoneNumber);
+        otp.setPhoneNumber(dto.getPhoneNumber());
         otp.setReferenceId(dojah.getReferenceId());
-        otp.setDeviceFingerprint(deviceFingerprint);
+        otp.setDeviceFingerprint(dto.getDeviceFingerprint());
         otp.setUsed(false);
         otp.setCreatedAt(Instant.now());
 
