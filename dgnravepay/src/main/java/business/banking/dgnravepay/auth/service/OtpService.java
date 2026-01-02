@@ -51,80 +51,73 @@ public class OtpService {
     }
 
 
+    public boolean validateOtp(ValidateOtpRequestDto dto) {
 
+        // Fetch OTP request
+        OtpRequestEntity otp = otpRepo.findByReferenceId(dto.getReferenceId())
+                .orElseThrow(() -> new IllegalArgumentException("OTP not found"));
 
-    public void validateOtp(ValidateOtpRequestDto dto) {
-            //  Fetch OTP request
-            OtpRequestEntity otp = otpRepo.findByReferenceId(dto.getReferenceId())
-                    .orElseThrow(() -> new IllegalArgumentException("OTP not found"));
-
-            if (otp.isUsed()) {
-                throw new IllegalStateException("OTP already used");
-            }
-
-            //  Validate OTP with Dojah
-            boolean valid = dojahClient.validateOtp(
-                    dto.getReferenceId(),
-                    dto.getCode()
-            );
-
-            if (!valid) {
-                throw new IllegalArgumentException("Invalid OTP");
-            }
-
-            //  Mark OTP as used
-            otp.setUsed(true);
-            otpRepo.save(otp);
-            otpCacheService.delete(dto.getReferenceId());
-
-            // Create or update user
-            UserEntity user = userRepo.findByPhoneNumber(otp.getPhoneNumber())
-                    .orElseGet(() -> {
-                        UserEntity u = new UserEntity();
-                        u.setId(UUID.randomUUID());
-                        u.setPhoneNumber(otp.getPhoneNumber());
-                        u.setDeviceFingerprint(otp.getDeviceFingerprint());
-                        u.setCreatedAt(Instant.now());
-                        return u;
-                    });
-
-            user.setVerified(true);
-
-            // Save device fingerprint into USERS table
-            user.setDeviceFingerprint(otp.getDeviceFingerprint());
-
-            userRepo.save(user);
-
-            // DEVICE TRUST SCORE UPDATE / CREATE
-            deviceTrustRepo
-                    .findByUserIdAndDeviceFingerprintAndPhoneNumber(
-                            user.getId(),
-                            otp.getDeviceFingerprint(),
-                            otp.getPhoneNumber()
-                    )
-                    .ifPresentOrElse(
-                            trust -> {
-                                //  Existing trusted device
-                                trust.setTrustScore(
-                                        Math.min(trust.getTrustScore() + 10, 100)
-                                );
-                                trust.setLastUsedAt(Instant.now());
-                                deviceTrustRepo.save(trust);
-                            },
-                            () -> {
-                                //  New trusted device
-                                DeviceTrustEntity trust = new DeviceTrustEntity();
-                                trust.setId(UUID.randomUUID());
-                                trust.setUserId(user.getId());
-                                trust.setPhoneNumber(otp.getPhoneNumber());
-                                trust.setDeviceFingerprint(otp.getDeviceFingerprint());
-                                trust.setTrustScore(100);
-                                trust.setLastUsedAt(Instant.now());
-                                deviceTrustRepo.save(trust);
-                            }
-                    );
+        if (otp.isUsed()) {
+            throw new IllegalStateException("OTP already used");
         }
+
+        // Validate OTP with Dojah
+        boolean valid = dojahClient.validateOtp(
+                dto.getReferenceId(),
+                dto.getCode()
+        );
+
+        if (!valid) {
+            return false; // <-- return false instead of throwing
+        }
+
+        // Mark OTP as used
+        otp.setUsed(true);
+        otpRepo.save(otp);
+
+        // Create or update user
+        UserEntity user = userRepo.findByPhoneNumber(otp.getPhoneNumber())
+                .orElseGet(() -> {
+                    UserEntity u = new UserEntity();
+                    u.setId(UUID.randomUUID());
+                    u.setPhoneNumber(otp.getPhoneNumber());
+                    u.setDeviceFingerprint(otp.getDeviceFingerprint());
+                    u.setCreatedAt(Instant.now());
+                    return u;
+                });
+
+        user.setVerified(true);
+        user.setDeviceFingerprint(otp.getDeviceFingerprint());
+        userRepo.save(user);
+
+        // DEVICE TRUST SCORE UPDATE / CREATE
+        deviceTrustRepo
+                .findByUserIdAndDeviceFingerprintAndPhoneNumber(
+                        user.getId(),
+                        otp.getDeviceFingerprint(),
+                        otp.getPhoneNumber()
+                )
+                .ifPresentOrElse(
+                        trust -> {
+                            trust.setTrustScore(Math.min(trust.getTrustScore() + 10, 100));
+                            trust.setLastUsedAt(Instant.now());
+                            deviceTrustRepo.save(trust);
+                        },
+                        () -> {
+                            DeviceTrustEntity trust = new DeviceTrustEntity();
+                            trust.setId(UUID.randomUUID());
+                            trust.setUserId(user.getId());
+                            trust.setPhoneNumber(otp.getPhoneNumber());
+                            trust.setDeviceFingerprint(otp.getDeviceFingerprint());
+                            trust.setTrustScore(100);
+                            trust.setLastUsedAt(Instant.now());
+                            deviceTrustRepo.save(trust);
+                        }
+                );
+
+        return true;   // <-- SUCCESS RESULT
     }
+}
 
 
 

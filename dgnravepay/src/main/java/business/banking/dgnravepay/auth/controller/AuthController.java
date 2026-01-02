@@ -36,12 +36,19 @@ public class AuthController {
         return otpService.sendOtp(dto);
     }
 
-
-
     @PostMapping("/validate-otp")
-    public void validateOtp(@RequestBody ValidateOtpRequestDto dto) {
-        otpService.validateOtp(dto);
+    public ValidateOtpResponseDto validateOtp(@RequestBody ValidateOtpRequestDto dto) {
+
+        boolean valid = otpService.validateOtp(dto);
+
+        if (!valid) {
+            return new ValidateOtpResponseDto(false, "Invalid OTP");
+        }
+
+        return new ValidateOtpResponseDto(true, "OTP Validated successfully");
     }
+
+
 
     @PostMapping("/resend-otp")
     public void resendOtp(@RequestBody ResendOtpRequestDto dto) {
