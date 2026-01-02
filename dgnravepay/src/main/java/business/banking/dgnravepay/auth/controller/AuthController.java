@@ -7,6 +7,9 @@ import business.banking.dgnravepay.auth.service.OtpService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
+
+
+
 @RestController
 @RequestMapping("/api/auth")
 @RequiredArgsConstructor
@@ -26,10 +29,14 @@ public class AuthController {
         authService.logout(authHeader);
     }
 
+
+
     @PostMapping("/send-otp")
-    public void sendOtp(@RequestBody SendOtpRequestDto dto) {
-        otpService.sendOtp(dto);
+    public SendOtpResponseDto sendOtp(@RequestBody SendOtpRequestDto dto) {
+        return otpService.sendOtp(dto);
     }
+
+
 
     @PostMapping("/validate-otp")
     public void validateOtp(@RequestBody ValidateOtpRequestDto dto) {

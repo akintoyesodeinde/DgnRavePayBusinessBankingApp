@@ -4,6 +4,7 @@ package business.banking.dgnravepay.auth.service;
 
 import business.banking.dgnravepay.auth.client.DojahOtpClient;
 import business.banking.dgnravepay.auth.dto.SendOtpRequestDto;
+import business.banking.dgnravepay.auth.dto.SendOtpResponseDto;
 import business.banking.dgnravepay.auth.dto.ValidateOtpRequestDto;
 import business.banking.dgnravepay.auth.entity.DeviceTrustEntity;
 import business.banking.dgnravepay.auth.entity.OtpRequestEntity;
@@ -17,6 +18,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.Duration;
 import java.time.Instant;
+import java.util.Map;
 import java.util.UUID;
 
 
@@ -31,26 +33,27 @@ public class OtpService {
     private final DeviceTrustRepository deviceTrustRepo;
 
 
-    public void sendOtp(SendOtpRequestDto dto) {
+    public SendOtpResponseDto sendOtp(SendOtpRequestDto dto) {
 
-        // 2. Send OTP
-        String referenceId = dojahClient.sendOtp(dto.getPhoneNumber());
+        SendOtpResponseDto dojah = dojahClient.sendOtp(dto.getPhoneNumber());
 
-        // 4. Persist OTP request
         OtpRequestEntity otp = new OtpRequestEntity();
         otp.setId(UUID.randomUUID());
         otp.setPhoneNumber(dto.getPhoneNumber());
-        otp.setReferenceId(referenceId);
+        otp.setReferenceId(dojah.getReferenceId());
         otp.setDeviceFingerprint(dto.getDeviceFingerprint());
         otp.setUsed(false);
         otp.setCreatedAt(Instant.now());
 
         otpRepo.save(otp);
+
+        return dojah;
     }
 
 
 
-        public void validateOtp(ValidateOtpRequestDto dto) {
+
+    public void validateOtp(ValidateOtpRequestDto dto) {
             //  Fetch OTP request
             OtpRequestEntity otp = otpRepo.findByReferenceId(dto.getReferenceId())
                     .orElseThrow(() -> new IllegalArgumentException("OTP not found"));

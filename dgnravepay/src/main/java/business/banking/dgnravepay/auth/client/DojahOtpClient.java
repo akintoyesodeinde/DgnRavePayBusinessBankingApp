@@ -1,6 +1,8 @@
 package business.banking.dgnravepay.auth.client;
 
 import java.util.List; // Add this import
+
+import business.banking.dgnravepay.auth.dto.SendOtpResponseDto;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClient;
 
@@ -22,7 +24,8 @@ public class DojahOtpClient {
 
 
 
-    public String sendOtp(String phoneNumber) {
+    public SendOtpResponseDto sendOtp(String phoneNumber) {
+
         Map<String, Object> body = Map.of(
                 "sender_id", "DOJAH",
                 "destination", phoneNumber,
@@ -38,14 +41,21 @@ public class DojahOtpClient {
                 .retrieve()
                 .body(Map.class);
 
-        // FIX: Dojah returns "entity" as a List (ArrayList), not a Map
-        List<Map<String, Object>> entityList = (List<Map<String, Object>>) response.get("entity");
+        List<Map<String, Object>> entityList =
+                (List<Map<String, Object>>) response.get("entity");
 
-        // Get the first item from the list
-        Map<String, Object> firstEntity = entityList.get(0);
+        Map<String, Object> first = entityList.get(0);
 
-        return firstEntity.get("reference_id").toString();
+        String referenceId = first.get("reference_id").toString();
+        String status = first.get("status").toString();
+        String destination = first.get("destination").toString();
+
+        return new SendOtpResponseDto(referenceId, status, destination);
     }
+
+
+
+
 
     public boolean validateOtp(String referenceId, String code) {
         Map response = restClient.get()
