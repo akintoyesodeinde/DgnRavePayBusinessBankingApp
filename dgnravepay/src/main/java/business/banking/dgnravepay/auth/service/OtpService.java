@@ -47,6 +47,12 @@ public class OtpService {
 
         otpRepo.save(otp);
 
+
+        if (!"sent".equalsIgnoreCase(dojah.getStatus())) {
+            throw new RuntimeException("OTP not sent");
+        }
+
+
         return dojah;
     }
 
