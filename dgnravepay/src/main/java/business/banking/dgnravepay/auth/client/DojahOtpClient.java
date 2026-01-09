@@ -29,12 +29,12 @@ public class DojahOtpClient {
     public SendOtpResponseDto sendOtp(String phoneNumber) {
         try {
             Map<String, Object> body = Map.of(
-                    "sender_id", "DOJAH",
+                    "sender_id", "DgnRavePay",
                     "destination", phoneNumber,
                     "channel", "sms",
                     "length", 6,
                     "expiry", 10,
-                    "priority", true
+                    "priority", false
             );
 
             Map response = restClient.post()
