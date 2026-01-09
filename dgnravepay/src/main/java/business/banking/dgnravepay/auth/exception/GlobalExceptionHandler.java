@@ -11,56 +11,56 @@ import org.springframework.web.client.HttpClientErrorException;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
-
-    private static final Logger log = LoggerFactory.getLogger(GlobalExceptionHandler.class);
-
-    // 1. Catch API Client Errors (Dojah 4xx errors)
-    @ExceptionHandler(HttpClientErrorException.class)
-    public ResponseEntity<ApiErrorResponse> handleHttpClientError(HttpClientErrorException ex) {
-        // This log will show up in your DigitalOcean Logs
-        log.error("Dojah API External Error: Status Code: {}, Response Body: {}",
-                ex.getStatusCode(), ex.getResponseBodyAsString());
-
-        if (ex.getStatusCode() == HttpStatus.FAILED_DEPENDENCY) {
-            ApiErrorResponse error = new ApiErrorResponse(
-                    424,
-                    "SMS Provider Error: Insufficient Balance or Route Issue. Please contact support. Dojah returned: " + ex.getResponseBodyAsString(),
-                    System.currentTimeMillis()
-            );
-            return new ResponseEntity<>(error, HttpStatus.FAILED_DEPENDENCY);
-        }
-
-        ApiErrorResponse error = new ApiErrorResponse(
-                ex.getStatusCode().value(),
-                "External Service Error: " + ex.getStatusText(),
-                System.currentTimeMillis()
-        );
-        return new ResponseEntity<>(error, ex.getStatusCode());
-    }
-
-    // 2. Catch Business Logic Errors (Custom RuntimeExceptions)
-    @ExceptionHandler(RuntimeException.class)
-    public ResponseEntity<ApiErrorResponse> handleRuntimeException(RuntimeException ex) {
-        log.warn("Business Logic Error: {}", ex.getMessage());
-        ApiErrorResponse error = new ApiErrorResponse(
-                HttpStatus.BAD_REQUEST.value(),
-                ex.getMessage(),
-                System.currentTimeMillis()
-        );
-        return new ResponseEntity<>(error, HttpStatus.BAD_REQUEST);
-    }
-
-    // 3. Global Fallback
-    @ExceptionHandler(Exception.class)
-    public ResponseEntity<ApiErrorResponse> handleGeneralError(Exception ex) {
-        log.error("Unexpected System Error: ", ex);
-        ApiErrorResponse error = new ApiErrorResponse(
-                HttpStatus.INTERNAL_SERVER_ERROR.value(),
-                "An internal server error occurred. Please check logs.",
-                System.currentTimeMillis()
-        );
-        return new ResponseEntity<>(error, HttpStatus.INTERNAL_SERVER_ERROR);
-    }
+//
+//    private static final Logger log = LoggerFactory.getLogger(GlobalExceptionHandler.class);
+//
+//    // 1. Catch API Client Errors (Dojah 4xx errors)
+//    @ExceptionHandler(HttpClientErrorException.class)
+//    public ResponseEntity<ApiErrorResponse> handleHttpClientError(HttpClientErrorException ex) {
+//        // This log will show up in your DigitalOcean Logs
+//        log.error("Dojah API External Error: Status Code: {}, Response Body: {}",
+//                ex.getStatusCode(), ex.getResponseBodyAsString());
+//
+//        if (ex.getStatusCode() == HttpStatus.FAILED_DEPENDENCY) {
+//            ApiErrorResponse error = new ApiErrorResponse(
+//                    424,
+//                    "SMS Provider Error: Insufficient Balance or Route Issue. Please contact support. Dojah returned: " + ex.getResponseBodyAsString(),
+//                    System.currentTimeMillis()
+//            );
+//            return new ResponseEntity<>(error, HttpStatus.FAILED_DEPENDENCY);
+//        }
+//
+//        ApiErrorResponse error = new ApiErrorResponse(
+//                ex.getStatusCode().value(),
+//                "External Service Error: " + ex.getStatusText(),
+//                System.currentTimeMillis()
+//        );
+//        return new ResponseEntity<>(error, ex.getStatusCode());
+//    }
+//
+//    // 2. Catch Business Logic Errors (Custom RuntimeExceptions)
+//    @ExceptionHandler(RuntimeException.class)
+//    public ResponseEntity<ApiErrorResponse> handleRuntimeException(RuntimeException ex) {
+//        log.warn("Business Logic Error: {}", ex.getMessage());
+//        ApiErrorResponse error = new ApiErrorResponse(
+//                HttpStatus.BAD_REQUEST.value(),
+//                ex.getMessage(),
+//                System.currentTimeMillis()
+//        );
+//        return new ResponseEntity<>(error, HttpStatus.BAD_REQUEST);
+//    }
+//
+//    // 3. Global Fallback
+//    @ExceptionHandler(Exception.class)
+//    public ResponseEntity<ApiErrorResponse> handleGeneralError(Exception ex) {
+//        log.error("Unexpected System Error: ", ex);
+//        ApiErrorResponse error = new ApiErrorResponse(
+//                HttpStatus.INTERNAL_SERVER_ERROR.value(),
+//                "An internal server error occurred. Please check logs.",
+//                System.currentTimeMillis()
+//        );
+//        return new ResponseEntity<>(error, HttpStatus.INTERNAL_SERVER_ERROR);
+//    }
 }
 
 
