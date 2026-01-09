@@ -33,28 +33,59 @@ public class OtpService {
     private final DeviceTrustRepository deviceTrustRepo;
 
 
-    public SendOtpResponseDto sendOtp(SendOtpRequestDto dto) {
-
-        SendOtpResponseDto dojah = dojahClient.sendOtp(dto.getPhoneNumber());
-
-        OtpRequestEntity otp = new OtpRequestEntity();
-        otp.setId(UUID.randomUUID());
-        otp.setPhoneNumber(dto.getPhoneNumber());
-        otp.setReferenceId(dojah.getReferenceId());
-        otp.setDeviceFingerprint(dto.getDeviceFingerprint());
-        otp.setUsed(false);
-        otp.setCreatedAt(Instant.now());
-
-        otpRepo.save(otp);
 
 
-        if (!"sent".equalsIgnoreCase(dojah.getStatus())) {
-            throw new RuntimeException("OTP not sent");
+        public SendOtpResponseDto sendOtp(SendOtpRequestDto dto) {
+            // 1. Attempt to send via Dojah Client first
+            SendOtpResponseDto dojahResponse = dojahClient.sendOtp(dto.getPhoneNumber());
+
+            // 2. Status Check: Dojah returns "sent" or "success" on success
+            boolean isSuccessful = "sent".equalsIgnoreCase(dojahResponse.getStatus()) ||
+                    "success".equalsIgnoreCase(dojahResponse.getStatus());
+
+            if (!isSuccessful) {
+                throw new RuntimeException("OTP failed to send via provider. Status: " + dojahResponse.getStatus());
+            }
+
+            // 3. Save to Database ONLY if step 2 passed
+            OtpRequestEntity otp = new OtpRequestEntity();
+            otp.setId(UUID.randomUUID());
+            otp.setPhoneNumber(dto.getPhoneNumber());
+            otp.setReferenceId(dojahResponse.getReferenceId());
+            otp.setDeviceFingerprint(dto.getDeviceFingerprint());
+            otp.setUsed(false);
+            otp.setCreatedAt(Instant.now());
+
+            otpRepo.save(otp);
+
+            return dojahResponse;
         }
 
 
-        return dojah;
-    }
+
+
+//    public SendOtpResponseDto sendOtp(SendOtpRequestDto dto) {
+//
+//        SendOtpResponseDto dojah = dojahClient.sendOtp(dto.getPhoneNumber());
+//
+//        OtpRequestEntity otp = new OtpRequestEntity();
+//        otp.setId(UUID.randomUUID());
+//        otp.setPhoneNumber(dto.getPhoneNumber());
+//        otp.setReferenceId(dojah.getReferenceId());
+//        otp.setDeviceFingerprint(dto.getDeviceFingerprint());
+//        otp.setUsed(false);
+//        otp.setCreatedAt(Instant.now());
+//
+//        otpRepo.save(otp);
+//
+//
+//        if (!"sent".equalsIgnoreCase(dojah.getStatus())) {
+//            throw new RuntimeException("OTP not sent");
+//        }
+//
+//
+//        return dojah;
+//    }
 
 
     public boolean validateOtp(ValidateOtpRequestDto dto) {
