@@ -1,13 +1,13 @@
 package business.banking.dgnravepay.auth.client;
 
-import java.util.List; // Add this import
-
 import business.banking.dgnravepay.auth.dto.SendOtpResponseDto;
-import org.springframework.http.HttpStatus;
+import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestClient;
 
+import java.util.List;
 import java.util.Map;
 
 @Component
@@ -23,13 +23,10 @@ public class DojahOtpClient {
                 .build();
     }
 
-
-
-
     public SendOtpResponseDto sendOtp(String phoneNumber) {
         try {
             Map<String, Object> body = Map.of(
-                    "sender_id", "DgnRavePay",
+                    "sender_id", "DOJAH",
                     "destination", phoneNumber,
                     "channel", "sms",
                     "length", 6,
@@ -37,69 +34,52 @@ public class DojahOtpClient {
                     "priority", false
             );
 
-            Map response = restClient.post()
+
+
+// ... inside the sendOtp method
+            Map<String, Object> response = restClient.post()
                     .uri("/otp")
                     .body(body)
                     .retrieve()
-                    .onStatus(status -> status.value() == 424, (request, resp) -> {
-                        // This forces the 424 to be handled by our GlobalExceptionHandler
-                        throw new HttpClientErrorException(HttpStatus.FAILED_DEPENDENCY, "Dojah Insufficient Balance");
+                    .onStatus(HttpStatusCode::isError, (request, resp) -> {
+                        byte[] bodyBytes = resp.getBody().readAllBytes();
+                        throw HttpClientErrorException.create(
+                                resp.getStatusCode(),
+                                "Dojah API Error",
+                                resp.getHeaders(),
+                                bodyBytes,
+                                null
+                        );
                     })
-                    .body(Map.class);
+                    // This tells Spring exactly what the Map keys and values are
+                    .body(new ParameterizedTypeReference<Map<String, Object>>() {});
 
             if (response == null || !response.containsKey("entity")) {
-                throw new RuntimeException("Invalid response from Dojah provider.");
+                throw new RuntimeException("Invalid response structure from Dojah provider.");
             }
 
             List<Map<String, Object>> entityList = (List<Map<String, Object>>) response.get("entity");
+            if (entityList == null || entityList.isEmpty()) {
+                throw new RuntimeException("Dojah returned an empty entity list.");
+            }
+
             Map<String, Object> first = entityList.get(0);
 
             return new SendOtpResponseDto(
-                    first.get("reference_id").toString(),
-                    first.get("status").toString(),
-                    first.get("destination").toString()
+                    String.valueOf(first.get("reference_id")),
+                    String.valueOf(first.get("status")),
+                    String.valueOf(first.get("destination"))
             );
 
         } catch (HttpClientErrorException e) {
-            // Re-throw so the GlobalExceptionHandler catches it
+            // Let the GlobalExceptionHandler handle these specific HTTP errors
             throw e;
         } catch (Exception e) {
-            throw new RuntimeException("Could not process OTP request: " + e.getMessage());
+            // General business logic or parsing errors
+            throw new RuntimeException("Internal error processing OTP: " + e.getMessage());
         }
     }
 
-
-
-//
-//    public SendOtpResponseDto sendOtp(String phoneNumber) {
-//
-//        Map<String, Object> body = Map.of(
-//                "sender_id", "DOJAH",
-//                "destination", phoneNumber,
-//                "channel", "sms",
-//                "length", 6,
-//                "expiry", 10,
-//                "priority", true
-//        );
-//
-//        Map response = restClient.post()
-//                .uri("/otp")
-//                .body(body)
-//                .retrieve()
-//                .body(Map.class);
-//
-//        List<Map<String, Object>> entityList =
-//                (List<Map<String, Object>>) response.get("entity");
-//
-//        Map<String, Object> first = entityList.get(0);
-//
-//        String referenceId = first.get("reference_id").toString();
-//        String status = first.get("status").toString();
-//        String destination = first.get("destination").toString();
-//
-//        return new SendOtpResponseDto(referenceId, status, destination);
-//    }
-//
 
 
 
