@@ -17,18 +17,14 @@ public class GlobalExceptionHandler {
     // 1. Catch API Client Errors (Dojah 4xx errors)
     @ExceptionHandler(HttpClientErrorException.class)
     public ResponseEntity<ApiErrorResponse> handleHttpClientError(HttpClientErrorException ex) {
-        String rawBody = ex.getResponseBodyAsString();
-        // If body is empty, provide a descriptive fallback
-        String detailedMessage = (rawBody == null || rawBody.isEmpty())
-                ? "Dojah returned no error details (Empty Body). This usually implies a Route or Provider rejection."
-                : rawBody;
-
-        log.error("Dojah API External Error: Status Code: {}, Response Body: {}", ex.getStatusCode(), detailedMessage);
+        // This log will show up in your DigitalOcean Logs
+        log.error("Dojah API External Error: Status Code: {}, Response Body: {}",
+                ex.getStatusCode(), ex.getResponseBodyAsString());
 
         if (ex.getStatusCode() == HttpStatus.FAILED_DEPENDENCY) {
             ApiErrorResponse error = new ApiErrorResponse(
                     424,
-                    "SMS Provider Error: Failed Dependency. " + detailedMessage,
+                    "SMS Provider Error: Insufficient Balance or Route Issue. Please contact support. Dojah returned: " + ex.getResponseBodyAsString(),
                     System.currentTimeMillis()
             );
             return new ResponseEntity<>(error, HttpStatus.FAILED_DEPENDENCY);
@@ -41,30 +37,6 @@ public class GlobalExceptionHandler {
         );
         return new ResponseEntity<>(error, ex.getStatusCode());
     }
-
-
-//    @ExceptionHandler(HttpClientErrorException.class)
-//    public ResponseEntity<ApiErrorResponse> handleHttpClientError(HttpClientErrorException ex) {
-//        // This log will show up in your DigitalOcean Logs
-//        log.error("Dojah API External Error: Status Code: {}, Response Body: {}",
-//                ex.getStatusCode(), ex.getResponseBodyAsString());
-//
-//        if (ex.getStatusCode() == HttpStatus.FAILED_DEPENDENCY) {
-//            ApiErrorResponse error = new ApiErrorResponse(
-//                    424,
-//                    "SMS Provider Error: Insufficient Balance. Dojah returned: " + ex.getResponseBodyAsString(),
-//                    System.currentTimeMillis()
-//            );
-//            return new ResponseEntity<>(error, HttpStatus.FAILED_DEPENDENCY);
-//        }
-//
-//        ApiErrorResponse error = new ApiErrorResponse(
-//                ex.getStatusCode().value(),
-//                "External Service Error: " + ex.getStatusText(),
-//                System.currentTimeMillis()
-//        );
-//        return new ResponseEntity<>(error, ex.getStatusCode());
- //   }
 
     // 2. Catch Business Logic Errors (Custom RuntimeExceptions)
     @ExceptionHandler(RuntimeException.class)
