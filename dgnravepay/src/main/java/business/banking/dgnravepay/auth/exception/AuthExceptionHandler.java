@@ -9,10 +9,10 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.client.HttpClientErrorException;
 
-@RestControllerAdvice
-public class GlobalExceptionHandler {
+@RestControllerAdvice(basePackages = "business.banking.dgnravepay.auth")
+public class AuthExceptionHandler {
 
-    private static final Logger log = LoggerFactory.getLogger(GlobalExceptionHandler.class);
+    private static final Logger log = LoggerFactory.getLogger(AuthExceptionHandler.class);
 
     @ExceptionHandler(HttpClientErrorException.class)
     public ResponseEntity<ApiErrorResponse> handleHttpClientError(HttpClientErrorException ex) {

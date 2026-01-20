@@ -1,9 +1,7 @@
 package business.banking.dgnravepay.auth.entity;
 
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -15,10 +13,10 @@ import java.util.UUID;
 @Getter
 @Setter
 public class FraudLogEntity {
-
     @Id
+    @GeneratedValue(strategy = GenerationType.UUID)
+    @Column(nullable = false, updatable = false)
     private UUID id;
-
     private String phoneNumber;
     private String deviceFingerprint;
     private String reason;

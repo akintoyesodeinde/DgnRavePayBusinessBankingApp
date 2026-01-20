@@ -1,10 +1,7 @@
 package business.banking.dgnravepay.auth.entity;
 
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -22,8 +19,9 @@ import java.util.UUID;
 @Getter
 @Setter
 public class OtpRequestEntity {
-
     @Id
+    @GeneratedValue(strategy = GenerationType.UUID)
+    @Column(nullable = false, updatable = false)
     private UUID id;
 
     private String phoneNumber;
@@ -37,4 +35,12 @@ public class OtpRequestEntity {
     private int resendCount;
 
     private Instant createdAt;
+
+    private String firstName;
+
+    private String lastName;
+
+    private String email;
+
+    private String passwordHash;
 }

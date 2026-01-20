@@ -15,19 +15,29 @@ import org.springframework.web.bind.annotation.*;
 @RequiredArgsConstructor
 public class AuthController {
 
-    private final OtpService otpService;
     private final OtpResendService otpResendService;
     private final AuthService authService;
+    private final OtpService otpService;
+
+//
+//    @PostMapping("/login")
+//    public LoginResponse login(@RequestBody PasswordLoginRequest request) {
+//        return authService.loginWithoutOtp(request);
+//    }
+
+
 
     @PostMapping("/login")
-    public LoginResponse login(@RequestBody PasswordLoginRequest request) {
+    public LoginResponseDto login(@RequestBody LoginRequest request) {
         return authService.loginWithoutOtp(request);
     }
 
-    @PostMapping("/logout")
-    public void logout(@RequestHeader("Authorization") String authHeader) {
-        authService.logout(authHeader);
-    }
+
+//
+//    @PostMapping("/logout")
+//    public void logout(@RequestHeader("Authorization") String authHeader) {
+//        authService.logout(authHeader);
+//    }
 
 
 
