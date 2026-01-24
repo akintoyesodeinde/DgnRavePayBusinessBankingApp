@@ -2,7 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/.idea/dgnravepay.iml" filepath="$PROJECT_DIR$/.idea/dgnravepay.iml" />
+      <module fileurl="file://$PROJECT_DIR$/dgnravepay/dgnravepay.iml" filepath="$PROJECT_DIR$/dgnravepay/dgnravepay.iml" />
     </modules>
   </component>
 </project>

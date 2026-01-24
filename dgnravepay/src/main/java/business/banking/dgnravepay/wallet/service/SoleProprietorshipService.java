@@ -17,9 +17,13 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.multipart.MultipartFile;
+import business.banking.dgnravepay.wallet.entity.DocumentUploadAudit;
+import business.banking.dgnravepay.wallet.repository.DocumentUploadAuditRepository;
+//import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
 import java.time.Instant;
+import java.util.List;
 import java.util.UUID;
 
 
@@ -32,6 +36,7 @@ public class SoleProprietorshipService {
     private final UserProprietorRepository userProprietorRepository;
     private final WalletUpgradeClient walletUpgradeClient;
     private final UserWalletUpgradeRepository userWalletUpgradeRepository;
+    private final DocumentUploadAuditRepository auditRepository;
 
     /* =========================
        CAC VERIFICATION PAGE
@@ -128,8 +133,11 @@ try{
         );
 
         // 🔹 Call External API
-        WalletUpgradeResponseDto response =
-                walletUpgradeClient.walletUpgrade(request, user.getEmail());
+//        WalletUpgradeResponseDto response =
+//                walletUpgradeClient.walletUpgrade(request, user.getEmail());
+
+    WalletUpgradeResponseDto response =
+            walletUpgradeClient.walletUpgrade(request, "payments@dgnravepay.com");
 
         // 🔹 Persist Wallet Upgrade
         UserWalletUpgrade upgrade = UserWalletUpgrade.builder()
@@ -187,27 +195,25 @@ try{
     /* =========================
        DOCUMENT REPLACEMENT
        ========================= */
-    public SoleProprietorship replaceCertificateApplication(
-            Long userProprietorId,
-            MultipartFile file) throws IOException {
+    @Transactional
+    public void replaceCertificateApplication(Long userProprietorId, MultipartFile file) throws IOException {
 
-    SoleProprietorship entity = repository
-            .findByUserProprietorId(userProprietorId)
-            .orElseThrow(() ->
-                    new IllegalArgumentException("Sole proprietorship record not found"));
+        // 1. Update Current Version
+        SoleProprietorship entity = repository.findByUserProprietorId(userProprietorId)
+                .orElseThrow(() -> new IllegalArgumentException("Record not found"));
 
-    //  Replace ONLY the document
+
         entity.setCertificateApplicationForm(file.getBytes());
+        repository.save(entity);
 
-        return repository.save(entity);
 
-
-}
-
+    }
 
 
 
-    public SoleProprietorship replaceCertificateBusinessName(
+
+
+    public void replaceCertificateBusinessName(
             Long userProprietorId,
             MultipartFile file) throws IOException {
 
@@ -217,7 +223,7 @@ try{
 
         entity.setCertificateOfBusinessName(file.getBytes());
 
-        return repository.save(entity);
+        repository.save(entity);
 
 
 

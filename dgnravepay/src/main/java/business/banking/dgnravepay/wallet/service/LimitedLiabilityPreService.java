@@ -123,8 +123,11 @@ public class LimitedLiabilityPreService {
         );
 
         // 🔹 Call External API
+//        WalletUpgradeResponseDto response =
+//                walletUpgradeClient.walletUpgrade(request, user.getEmail());
+
         WalletUpgradeResponseDto response =
-                walletUpgradeClient.walletUpgrade(request, user.getEmail());
+                walletUpgradeClient.walletUpgrade(request, "payments@dgnravepay.com");
 
         // 🔹 Persist Wallet Upgrade
         UserWalletUpgrade upgrade = UserWalletUpgrade.builder()
@@ -159,25 +162,25 @@ public class LimitedLiabilityPreService {
 
 
     /* ===== DOWNLOAD DOCUMENT ===== */
-    public byte[] download(Long userProprietorId, String doc) {
+    public byte[] download(Long userProprietorId, LimitedLiabilityPreDocumentType doc) {
 
         LimitedLiabilityPre e = repository.findByUserProprietorId(userProprietorId)
                 .orElseThrow();
 
         return switch (doc) {
-            case "MEMO" -> e.getMemorandumOfAssociation();
-            case "CAC3" -> e.getFormCac3();
-            case "CAC2" -> e.getFormCac2();
-            case "CAC7" -> e.getFormCac7();
-            case "INCORP" -> e.getCertificateOfIncorporation();
-            case "BOARD" -> e.getBoardResolution();
-            default -> throw new IllegalArgumentException("Invalid document");
+            case MEMO -> e.getMemorandumOfAssociation();
+            case CAC3 -> e.getFormCac3();
+            case CAC2 -> e.getFormCac2();
+            case CAC7 -> e.getFormCac7();
+            case INCORP -> e.getCertificateOfIncorporation();
+            case BOARD -> e.getBoardResolution();
+
         };
     }
 
 
     /* ===== REPLACE DOCUMENT ===== */
-    public LimitedLiabilityPre replaceDocument(
+    public void replaceDocument(
             Long userProprietorId,
             LimitedLiabilityPreDocumentType type,
             MultipartFile file
@@ -199,7 +202,7 @@ public class LimitedLiabilityPreService {
             case BOARD -> entity.setBoardResolution(bytes);
         }
 
-        return repository.save(entity);
+        repository.save(entity);
     }
 
 

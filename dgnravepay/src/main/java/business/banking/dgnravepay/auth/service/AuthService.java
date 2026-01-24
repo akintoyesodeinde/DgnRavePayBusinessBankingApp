@@ -9,11 +9,16 @@ import business.banking.dgnravepay.auth.repository.DeviceTrustRepository;
 import business.banking.dgnravepay.auth.repository.LoginUserRepository;
 import business.banking.dgnravepay.auth.repository.RefreshTokenRepository;
 import business.banking.dgnravepay.auth.repository.UserRepository;
+import business.banking.dgnravepay.wallet.client.WalletUpgradeClient;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import java.time.Instant;
 import java.util.UUID;
+
 
 @Service
 @RequiredArgsConstructor
@@ -26,12 +31,36 @@ public class AuthService {
     private final AppProperties props;
     private final ErrandPayClient errandPayClient;
     private final LoginUserRepository loginUserRepository;
+    private static final Logger log = LoggerFactory.getLogger(AuthService.class);
 
 
-    public LoginResponseDto loginWithoutOtp(LoginRequest req) {
 
+    public LoginResponseDto loginWithoutOtp(PasswordLoginRequest req) {
+
+//        // 1. Fetch ALL users and find the one whose hash matches this raw password
+//        // This avoids passing phone numbers in the request
+//        UserEntity user = userRepo.findAll().stream()
+//                .filter(u -> passwordEncoder.matches(req.getPassword(), u.getPasswordHash()))
+//                .findFirst()
+//                .orElseThrow(() -> new IllegalArgumentException("Invalid password"));
+
+//        // 2. Device Fingerprint and Phone Number Validation
+//        DeviceTrustEntity trust = deviceTrustRepo.
+//                findByUserIdAndDeviceFingerprintAndPhoneNumber(user.getId(), req.getDeviceFingerprint(), user.getPhoneNumber())
+//                .orElseThrow(() -> new IllegalStateException("OTP required: Device not recognized"));
+//
+//        if (trust.getTrustScore() < 70) {
+//            throw new IllegalStateException("OTP required: Trust score too low");
+//        }
+//
+//        // 3. Update trust metadata
+//        trust.setLastUsedAt(Instant.now());
+//        deviceTrustRepo.save(trust);
+
+
+        //log.info("Performing external login for: {}", req.getEmail());
         LoginResponseDto response =
-                errandPayClient.login(req.getEmail(), req.getPassword());
+                errandPayClient.login("payments@dgnravepay.com", "JdeZWWVY");
 
         LoginUser audit = new LoginUser();
         audit.setUserId(response.getId());          // external user ID
@@ -78,6 +107,100 @@ public class AuthService {
 
 
 
+
+
+
+
+
+
+
+//    public LoginResponseDto loginWithoutOtp(LoginRequest req) {
+//        log.info("Performing external login for: {}", req.getEmail());
+//        LoginResponseDto response =
+//                errandPayClient.login(req.getEmail(), req.getPassword());
+//
+//        LoginUser audit = new LoginUser();
+//        audit.setUserId(response.getId());          // external user ID
+//        audit.setFirstName(response.getFirstName());
+//        audit.setLastName(response.getLastName());
+//        audit.setUserName(response.getUserName());
+//        audit.setEmail(response.getEmail());
+//        audit.setPhoneNumber(response.getPhoneNumber());
+//        audit.setStatus(response.getStatus());
+//        audit.setRoleCode(response.getRoleCode());
+//        audit.setReferalCode(response.getReferalCode());
+//        audit.setUserReferalCode(response.getUserReferalCode());
+//        audit.setCountryCode(response.getCountryCode());
+//        audit.setIsPINSet(response.getIsPINSet());
+//        audit.setIsKycCompleted(response.getIsKycCompleted());
+//        audit.setAccessToken(response.getAccessToken());
+//        audit.setTokenType(response.getTokenType());
+//        audit.setExpiresIn(response.getExpiresIn());
+//        audit.setRefreshToken(response.getRefreshToken());
+//        audit.setAgentCode(response.getAgentCode());
+//        audit.setIsEmailConfirmed(response.getIsEmailConfirmed());
+//        audit.setIsPhoneNumberConfirmed(response.getIsPhoneNumberConfirmed());
+//        audit.setLga(response.getLga());
+//        audit.setAddress(response.getAddress());
+//        audit.setState(response.getState());
+//        audit.setIsSecurityQuestionSet(response.getIsSecurityQuestionSet());
+//        audit.setIsPushNotificationSet(response.getIsPushNotificationSet());
+//        audit.setIsDeviceTokenValidated(response.getIsDeviceTokenValidated());
+//        audit.setIsDefaultPassword(response.getIsDefaultPassword());
+//        audit.setTierCode(response.getTierCode());
+//        audit.setIsKycSentToThirdParty(response.getIsKycSentToThirdParty());
+//        audit.setIsPoolType(response.getIsPoolType());
+//        audit.setCategory(response.getCategory());
+//        audit.setActivePendingLien(response.getActivePendingLien());
+//        audit.setBankName(response.getBankName());
+//        audit.setUplineName(response.getUplineName());
+//        audit.setName(response.getName());
+//        audit.setReferenceId(response.getReferenceId());
+//
+//        loginUserRepository.save(audit);
+//
+//        return response;
+//    }
+//
+
+
+
+//    public LoginResponse loginWithoutOtp(PasswordLoginRequest req) {
+//        // 1. Fetch ALL users and find the one whose hash matches this raw password
+//        // This avoids passing phone numbers in the request
+//        UserEntity user = userRepo.findAll().stream()
+//                .filter(u -> passwordEncoder.matches(req.getPassword(), u.getPasswordHash()))
+//                .findFirst()
+//                .orElseThrow(() -> new IllegalArgumentException("Invalid password"));
+//
+//        // 2. Device Fingerprint and Phone Number Validation
+//        DeviceTrustEntity trust = deviceTrustRepo.
+//                findByUserIdAndDeviceFingerprintAndPhoneNumber(user.getId(), req.getDeviceFingerprint(), user.getPhoneNumber())
+//                .orElseThrow(() -> new IllegalStateException("OTP required: Device not recognized"));
+//
+//        if (trust.getTrustScore() < 70) {
+//            throw new IllegalStateException("OTP required: Trust score too low");
+//        }
+//
+//        // 3. Update trust metadata
+//        trust.setLastUsedAt(Instant.now());
+//        deviceTrustRepo.save(trust);
+//
+//        // 4. Issue Tokens
+//        String access = jwtService.generateAccessToken(user);
+//        String refresh = jwtService.generateRefreshToken(user);
+//
+//        refreshTokenRepo.save(
+//                RefreshToken.builder()
+//                        .token(refresh)
+//                        .user(user)
+//                        .expiryDate(Instant.now().plusSeconds(props.getRefreshTokenExpirationSec()))
+//                        .build()
+//        );
+//
+//        return new LoginResponse(access, refresh);
+//    }
+//
 
 
 
@@ -132,43 +255,6 @@ public class AuthService {
 
 
 
-
-//    public LoginResponse loginWithoutOtp(PasswordLoginRequest req) {
-//        // 1. Fetch ALL users and find the one whose hash matches this raw password
-//        // This avoids passing phone numbers in the request
-//        UserEntity user = userRepo.findAll().stream()
-//                .filter(u -> passwordEncoder.matches(req.getPassword(), u.getPasswordHash()))
-//                .findFirst()
-//                .orElseThrow(() -> new IllegalArgumentException("Invalid password"));
-//
-//        // 2. Device Fingerprint and Phone Number Validation
-//        DeviceTrustEntity trust = deviceTrustRepo.
-//                findByUserIdAndDeviceFingerprintAndPhoneNumber(user.getId(), req.getDeviceFingerprint(), user.getPhoneNumber())
-//                .orElseThrow(() -> new IllegalStateException("OTP required: Device not recognized"));
-//
-//        if (trust.getTrustScore() < 70) {
-//            throw new IllegalStateException("OTP required: Trust score too low");
-//        }
-//
-//        // 3. Update trust metadata
-//        trust.setLastUsedAt(Instant.now());
-//        deviceTrustRepo.save(trust);
-//
-//        // 4. Issue Tokens
-//        String access = jwtService.generateAccessToken(user);
-//        String refresh = jwtService.generateRefreshToken(user);
-//
-//        refreshTokenRepo.save(
-//                RefreshToken.builder()
-//                        .token(refresh)
-//                        .user(user)
-//                        .expiryDate(Instant.now().plusSeconds(props.getRefreshTokenExpirationSec()))
-//                        .build()
-//        );
-//
-//        return new LoginResponse(access, refresh);
-//    }
-//
 
 
 

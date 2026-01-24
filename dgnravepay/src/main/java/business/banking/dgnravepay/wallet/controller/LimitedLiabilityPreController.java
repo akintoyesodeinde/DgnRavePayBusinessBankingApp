@@ -13,7 +13,10 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.net.URLConnection;
+import java.time.LocalDateTime;
 
 @RestController
 @RequestMapping("/api/cac/limited-pre")
@@ -23,7 +26,7 @@ public class LimitedLiabilityPreController {
     private final LimitedLiabilityPreService service;
 
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<Void> create(
+    public ResponseEntity<ApiResponse> create(
             @ModelAttribute @Valid LimitedLiabilityPreRequestDto dto,
             @RequestParam("memorandum") MultipartFile memorandum,
             @RequestParam("cac3") MultipartFile cac3,
@@ -33,15 +36,24 @@ public class LimitedLiabilityPreController {
             @RequestParam("boardResolution") MultipartFile boardResolution) throws IOException {
 
         service.create(dto, memorandum, cac3, cac2, cac7, incorporation, boardResolution);
-        return ResponseEntity.ok().build();
+
+
+        return ResponseEntity.ok(new ApiResponse(
+                "Limited Liability Created successfully",
+                LocalDateTime.now()
+        ));
     }
 
     @PostMapping("/account-name")
-    public ResponseEntity<Void> accountName(
+    public ResponseEntity<ApiResponse> accountName(
             @RequestBody LimitedPreAccountNameRequestDto dto) {
 
         service.setAccountName(dto);
-        return ResponseEntity.ok().build();
+
+        return ResponseEntity.ok(new ApiResponse(
+                "Business Account Name Created successfully",
+                LocalDateTime.now()
+        ));
     }
 
 
@@ -68,41 +80,84 @@ public class LimitedLiabilityPreController {
     @GetMapping("/document/{userProprietorId}/{type}")
     public ResponseEntity<byte[]> download(
             @PathVariable Long userProprietorId,
-            @PathVariable String type) {
+            @PathVariable LimitedLiabilityPreDocumentType type) {
 
         byte[] file = service.download(userProprietorId, type);
 
-        return ResponseEntity.ok()
-                .header(HttpHeaders.CONTENT_DISPOSITION,
-                        "attachment; filename=document.png")
-                .contentType(MediaType.APPLICATION_OCTET_STREAM)
-                .contentLength(file.length)
-                .body(file);
+        return buildFileResponse(file, "Document");
 
     }
+
+
+
+
+    /**
+     * Helper method to dynamically determine Content-Type and Filename Extension
+     */
+    private ResponseEntity<byte[]> buildFileResponse(byte[] file, String baseFileName) {
+        if (file == null || file.length == 0) {
+            return ResponseEntity.notFound().build();
+        }
+
+        String mimeType;
+        try (ByteArrayInputStream is = new ByteArrayInputStream(file)) {
+            mimeType = URLConnection.guessContentTypeFromStream(is);
+        } catch (IOException e) {
+            mimeType = null;
+        }
+
+        // Fallback logic if URLConnection fails to guess
+        if (mimeType == null) {
+            mimeType = MediaType.APPLICATION_OCTET_STREAM_VALUE;
+        }
+
+        // Determine extension based on mimeType for the filename
+        String extension = switch (mimeType) {
+            case "image/png" -> ".png";
+            case "image/jpeg" -> ".jpg";
+            case "application/pdf" -> ".pdf";
+            case "application/msword" -> ".doc";
+            case "application/vnd.openxmlformats-officedocument.wordprocessingml.document" -> ".docx";
+            default -> "";
+        };
+
+        return ResponseEntity.ok()
+                .contentType(MediaType.parseMediaType(mimeType))
+                // 'inline' allows Postman Preview to work for Images and PDFs
+                .header(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=" + baseFileName + extension)
+                .contentLength(file.length)
+                .body(file);
+    }
+
+
+
+
+
 
 
     @PutMapping(
             value = "/document/{userProprietorId}/{type}",
             consumes = MediaType.MULTIPART_FORM_DATA_VALUE
     )
-    public ResponseEntity<LimitedLiabilityPre> replaceDocument(
+    public ResponseEntity<ApiResponse> replaceDocument(
             @PathVariable Long userProprietorId,
             @PathVariable LimitedLiabilityPreDocumentType type,
             @RequestParam("file") MultipartFile file
     ) throws IOException {
 
-        LimitedLiabilityPre updated =
                 service.replaceDocument(userProprietorId, type, file);
 
-        return ResponseEntity.ok(updated);
+        return ResponseEntity.ok(new ApiResponse(
+                "Document updated successfully",
+                LocalDateTime.now()
+        ));
     }
 
 
     @PostMapping(
             value = "/director/{userProprietorId}",
             consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<Void> addDirector(
+    public ResponseEntity<ApiResponse> addDirector(
             @PathVariable Long userProprietorId,
             @ModelAttribute @Valid LimitedPreDirectorRequestDto dto,
             @RequestParam("proofOfIdentity")  MultipartFile proofOfIdentity,
@@ -116,7 +171,10 @@ public class LimitedLiabilityPreController {
                 proofOfAddress,
                 proofOfSignature);
 
-        return ResponseEntity.ok().build();
+        return ResponseEntity.ok(new ApiResponse(
+                "Director Created successfully",
+                LocalDateTime.now()
+        ));
     }
 
 
@@ -124,7 +182,7 @@ public class LimitedLiabilityPreController {
     @PostMapping(
             value = "/principal/{userProprietorId}",
             consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<Void> addPrincipal(
+    public ResponseEntity<ApiResponse> addPrincipal(
             @PathVariable Long userProprietorId,
             @ModelAttribute @Valid LimitedPrePrincipalRequestDto dto,
             @RequestParam("proofOfIdentity") MultipartFile proofOfIdentity,
@@ -138,10 +196,10 @@ public class LimitedLiabilityPreController {
                 proofOfAddress,
                 proofOfSignature);
 
-        return ResponseEntity.ok().build();
+        return ResponseEntity.ok(new ApiResponse(
+                "Principal Owner Created successfully",
+                LocalDateTime.now()
+        ));
     }
-
-
-
-
+    
 }

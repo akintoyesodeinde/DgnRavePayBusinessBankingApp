@@ -19,18 +19,18 @@ public class AuthController {
     private final AuthService authService;
     private final OtpService otpService;
 
-//
-//    @PostMapping("/login")
-//    public LoginResponse login(@RequestBody PasswordLoginRequest request) {
-//        return authService.loginWithoutOtp(request);
-//    }
-
-
 
     @PostMapping("/login")
-    public LoginResponseDto login(@RequestBody LoginRequest request) {
+    public LoginResponseDto login(@RequestBody PasswordLoginRequest request) {
         return authService.loginWithoutOtp(request);
     }
+
+//
+//
+//    @PostMapping("/login")
+//    public LoginResponseDto login(@RequestBody LoginRequest request) {
+//        return authService.loginWithoutOtp(request);
+//    }
 
 
 //

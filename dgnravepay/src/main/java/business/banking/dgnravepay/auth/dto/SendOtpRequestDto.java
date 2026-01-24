@@ -8,8 +8,8 @@ import lombok.Data;
 public class SendOtpRequestDto {
     private String phoneNumber;
     private String deviceFingerprint;
-    private String firstName;
-    private String lastName;
+//    private String firstName;
+//    private String lastName;
     private String email;
-    private String password;
+    //private String password;
 }

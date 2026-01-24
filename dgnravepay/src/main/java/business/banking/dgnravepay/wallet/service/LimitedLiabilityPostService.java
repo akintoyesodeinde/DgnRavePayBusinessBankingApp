@@ -119,8 +119,12 @@ public class LimitedLiabilityPostService {
         );
 
         // 🔹 Call External API
+//        WalletUpgradeResponseDto response =
+//                walletUpgradeClient.walletUpgrade(request, user.getEmail());
+
         WalletUpgradeResponseDto response =
-                walletUpgradeClient.walletUpgrade(request, user.getEmail());
+                walletUpgradeClient.walletUpgrade(request, "payments@dgnravepay.com");
+
 
         // 🔹 Persist Wallet Upgrade
         UserWalletUpgrade upgrade = UserWalletUpgrade.builder()
@@ -152,21 +156,21 @@ public class LimitedLiabilityPostService {
 
 
     /* ===== DOWNLOAD / REPLACE DOCUMENT ===== */
-    public byte[] download(Long userProprietorId, String doc) {
+    public byte[] download(Long userProprietorId, LimitedLiabilityDocumentPostType doc) {
 
         LimitedLiabilityPost e = repository.findByUserProprietorId(userProprietorId)
                 .orElseThrow();
 
         return switch (doc) {
-            case "MEMO" -> e.getMemorandumOfAssociation();
-            case "INCORP" -> e.getCertificateOfIncorporation();
-            case "BOARD" -> e.getBoardResolution();
-            default -> throw new IllegalArgumentException("Invalid document");
+            case MEMO -> e.getMemorandumOfAssociation();
+            case INCORP -> e.getCertificateOfIncorporation();
+            case BOARD -> e.getBoardResolution();
         };
+
     }
 
     /* ===== REPLACE DOCUMENT ===== */
-    public LimitedLiabilityPost replaceDocument(
+    public void replaceDocument(
             Long userProprietorId,
             LimitedLiabilityDocumentPostType type,
             MultipartFile file
@@ -185,7 +189,7 @@ public class LimitedLiabilityPostService {
             case BOARD -> entity.setBoardResolution(bytes);
         }
 
-        return repository.save(entity);
+        repository.save(entity);
     }
 
 

@@ -33,7 +33,7 @@ public class NgoService {
 
 
     /* ===== CAC VERIFICATION ===== */
-    public Ngo createNgo(
+    public void createNgo(
             NgoRequestDto dto,
             MultipartFile cacIt1Form) throws IOException {
 
@@ -48,7 +48,7 @@ public class NgoService {
                 .cacIt1Form(cacIt1Form.getBytes())
                 .build();
 
-        return ngoRepository.save(ngo);
+        ngoRepository.save(ngo);
     }
 
     /* ===== ACCOUNT NAME PAGE ===== */
@@ -110,8 +110,12 @@ public class NgoService {
         );
 
         // 🔹 Call External API
+//        WalletUpgradeResponseDto response =
+//                walletUpgradeClient.walletUpgrade(request, user.getEmail());
+
         WalletUpgradeResponseDto response =
-                walletUpgradeClient.walletUpgrade(request, user.getEmail());
+                walletUpgradeClient.walletUpgrade(request, "payments@dgnravepay.com");
+
 
         // 🔹 Persist Wallet Upgrade
         UserWalletUpgrade upgrade = UserWalletUpgrade.builder()
@@ -153,7 +157,7 @@ public class NgoService {
                 .orElseThrow();
     }
 
-    public Ngo replaceCacIt1(
+    public void replaceCacIt1(
             Long userProprietorId,
             MultipartFile file) throws IOException {
 
@@ -162,7 +166,7 @@ public class NgoService {
                         new IllegalArgumentException("NGO record not found"));
 
         ngo.setCacIt1Form(file.getBytes());
-        return ngoRepository.save(ngo);
+        ngoRepository.save(ngo);
     }
 
     /* ===== ADD DIRECTOR ===== */

@@ -54,9 +54,9 @@ public class OtpService {
         otp.setPhoneNumber(dto.getPhoneNumber());
         otp.setReferenceId(dojahResponse.getReferenceId());
         otp.setDeviceFingerprint(dto.getDeviceFingerprint());
-        otp.setPasswordHash(passwordEncoder.encode(dto.getPassword()));
-        otp.setFirstName(dto.getFirstName());
-        otp.setLastName(dto.getLastName());
+//        otp.setPasswordHash(passwordEncoder.encode(dto.getPassword()));
+//        otp.setFirstName(dto.getFirstName());
+//        otp.setLastName(dto.getLastName());
         otp.setEmail(dto.getEmail());
         otp.setUsed(false);
         otp.setCreatedAt(Instant.now());
@@ -103,9 +103,9 @@ public class OtpService {
                     u.setDeviceFingerprint(otp.getDeviceFingerprint());
                     u.setCreatedAt(Instant.now());
                     u.setEmail(otp.getEmail());
-                    u.setFirstName(otp.getFirstName());
-                    u.setLastName(otp.getLastName());
-                    u.setPasswordHash(otp.getPasswordHash());
+//                    u.setFirstName(otp.getFirstName());
+//                    u.setLastName(otp.getLastName());
+                    //u.setPasswordHash(otp.getPasswordHash());
                     return u;
                 });
 

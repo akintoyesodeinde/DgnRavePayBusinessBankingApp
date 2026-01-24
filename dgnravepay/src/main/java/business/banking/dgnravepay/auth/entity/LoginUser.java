@@ -5,6 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.Instant;
 import java.time.LocalDateTime;
@@ -119,4 +120,17 @@ public class LoginUser {
 
     @Column(columnDefinition = "TEXT")
     private String name;
+    @CreationTimestamp
+    @Column(name = "created_at", nullable = false, updatable = false, columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
+    private LocalDateTime createdAt;
+
+    /**
+     * Checks if the token is still valid.
+     * Returns true if expiresIn is in the future.
+     */
+    public boolean isTokenValid() {
+        if (this.expiresIn == null) return false;
+        // Check if current time is BEFORE the expiry time
+        return LocalDateTime.now().isBefore(this.expiresIn);
+    }
 }
