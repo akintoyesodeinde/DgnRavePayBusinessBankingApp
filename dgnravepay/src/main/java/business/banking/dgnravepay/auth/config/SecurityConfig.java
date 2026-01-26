@@ -76,7 +76,7 @@ public class SecurityConfig {
 
                         // ALL AUTH ROUTES ARE PUBLIC
                         .requestMatchers("/api/auth/send-otp", "/api/auth/login", "/api/auth/logout", "/api/auth/validate-otp", "/api/auth/resend-otp","/api/auth/**",
-                                "/api/industry/**", "/api/cac/limited-post/**", "/api/cac/limited-pre/**", "/api/location/**", "/api/cac/ngo/**", "/api/proprietor/**", "/api/cac/sole-proprietorship/**", "/error").permitAll()
+                                "/api/industry/**", "/api/cac/limited-post/**", "/api/cac/limited-pre/**", "/api/location/**", "/api/cac/ngo/**", "/api/proprietor/**", "/api/cac/sole-proprietorship/**", "/api/enums/**", "/error").permitAll()
 
                         // You also marked these public — keeping them
                         .requestMatchers("/roles/**", "/public/**", "/api/templates/**").permitAll()
