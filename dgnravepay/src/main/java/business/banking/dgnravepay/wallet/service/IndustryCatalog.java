@@ -3,6 +3,7 @@ package business.banking.dgnravepay.wallet.service;
 
 import business.banking.dgnravepay.wallet.enums.IndustryCategory;
 import business.banking.dgnravepay.wallet.enums.IndustrySubCategory;
+import business.banking.dgnravepay.wallet.enums.Occupation;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -130,6 +131,65 @@ public class IndustryCatalog {
                     IndustrySubCategory.OFFICE_SUPPORT
             );
 
+
+            default -> List.of();
+        };
+    }
+
+
+
+    public List<Occupation> getOccupations(IndustrySubCategory subCategory) {
+
+        return switch (subCategory) {
+
+            case CROP_PRODUCTION -> List.of(
+                    Occupation.FARMER,
+                    Occupation.AGRONOMIST,
+                    Occupation.CROP_SCIENTIST,
+                    Occupation.AGRICULTURAL_TECHNICIAN
+            );
+
+            case LIVESTOCK -> List.of(
+                    Occupation.LIVESTOCK_FARMER,
+                    Occupation.VETERINARY_TECHNICIAN,
+                    Occupation.ANIMAL_BREEDER,
+                    Occupation.POULTRY_FARMER
+            );
+
+            case CRUDE_PETROLEUM_GAS -> List.of(
+                    Occupation.PETROLEUM_ENGINEER,
+                    Occupation.DRILLING_ENGINEER,
+                    Occupation.RIG_TECHNICIAN,
+                    Occupation.OIL_GAS_OPERATOR
+            );
+
+            case IT_SERVICES -> List.of(
+                    Occupation.SOFTWARE_ENGINEER,
+                    Occupation.BACKEND_DEVELOPER,
+                    Occupation.FRONTEND_DEVELOPER,
+                    Occupation.MOBILE_APP_DEVELOPER,
+                    Occupation.DEVOPS_ENGINEER,
+                    Occupation.CLOUD_ENGINEER,
+                    Occupation.DATA_ENGINEER,
+                    Occupation.DATA_SCIENTIST,
+                    Occupation.CYBERSECURITY_ANALYST
+            );
+
+            case COMMERCIAL_BANKING -> List.of(
+                    Occupation.BANKER,
+                    Occupation.CREDIT_ANALYST,
+                    Occupation.LOAN_OFFICER,
+                    Occupation.COMPLIANCE_OFFICER,
+                    Occupation.RISK_ANALYST
+            );
+
+            case HOSPITALS -> List.of(
+                    Occupation.MEDICAL_DOCTOR,
+                    Occupation.NURSE,
+                    Occupation.PHARMACIST,
+                    Occupation.LAB_TECHNICIAN,
+                    Occupation.RADIOGRAPHER
+            );
 
             default -> List.of();
         };
