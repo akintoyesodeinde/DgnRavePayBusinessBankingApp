@@ -9,6 +9,8 @@ public enum IndustrySubCategory {
     FORESTRY,
     FISHING_AQUACULTURE,
 
+
+
     // MINING
     CRUDE_PETROLEUM_GAS,
     COAL_MINING,

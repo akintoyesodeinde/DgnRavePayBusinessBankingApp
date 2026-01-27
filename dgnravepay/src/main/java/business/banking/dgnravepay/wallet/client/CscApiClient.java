@@ -47,11 +47,16 @@ public class CscApiClient {
     private <T> List<T> send(String url, Class<T> clazz) {
         try {
             HttpResponse<String> response =
-                    client.send(request(url),
-                            HttpResponse.BodyHandlers.ofString());
+                    client.send(
+                            request(url),
+                            HttpResponse.BodyHandlers.ofString()
+                    );
 
+            //  PUT IT RIGHT HERE
             if (response.statusCode() != 200) {
-                throw new RuntimeException("CSC API ERROR");
+                throw new RuntimeException(
+                        "CSC API ERROR: " + response.statusCode() + " → " + response.body()
+                );
             }
 
             return mapper.readValue(
@@ -59,8 +64,11 @@ public class CscApiClient {
                     mapper.getTypeFactory()
                             .constructCollectionType(List.class, clazz)
             );
+
         } catch (Exception e) {
             throw new RuntimeException("CSC API FAILED", e);
         }
     }
+
 }
+
