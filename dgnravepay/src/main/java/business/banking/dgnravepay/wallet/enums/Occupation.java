@@ -191,6 +191,7 @@ public enum Occupation {
     PUBLIC_HEALTH_OFFICER,
     EPIDEMIOLOGIST,
     VETERINARIAN,
+    LAB_TECHNICIAN,
 
     /* =========================
        HOSPITALITY → ACCOMMODATION

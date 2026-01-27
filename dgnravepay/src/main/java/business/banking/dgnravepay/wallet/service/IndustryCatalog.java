@@ -188,7 +188,18 @@ public class IndustryCatalog {
                     Occupation.NURSE,
                     Occupation.PHARMACIST,
                     Occupation.LAB_TECHNICIAN,
-                    Occupation.RADIOGRAPHER
+                    Occupation.RADIOGRAPHER,
+                    Occupation.ANESTHETIST,
+                    Occupation.PARAMEDIC,
+                    Occupation.EMERGENCY_MEDICAL_TECHNICIAN,
+                    Occupation.PHYSIOTHERAPIST,
+                    Occupation.OCCUPATIONAL_THERAPIST,
+                    Occupation.PSYCHOLOGIST,
+                    Occupation.PSYCHIATRIST,
+                    Occupation.COUNSELOR,
+                    Occupation.PUBLIC_HEALTH_OFFICER,
+                    Occupation.EPIDEMIOLOGIST,
+                    Occupation.VETERINARIAN
             );
 
             default -> List.of();
